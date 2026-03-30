@@ -350,9 +350,29 @@
     .dot.correct { background: var(--green); }
     .dot.wrong { background: var(--red); }
 
+    .star-btn {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px;
+      z-index: 2;
+      transition: transform 0.15s;
+    }
+    .star-btn:active { transform: scale(1.35); }
+
     .drill-controls {
       display: flex;
-      gap: 10px;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .drill-filter-row {
+      display: flex;
+      gap: 8px;
     }
     .btn-secondary {
       flex: 1;
@@ -771,6 +791,7 @@
     <div class="flashcard-container" id="flashcardContainer" onclick="flipCard()">
       <div class="flashcard-inner" id="flashcardInner">
         <div class="flashcard-face flashcard-front">
+          <button class="star-btn" id="starBtn" onclick="event.stopPropagation(); toggleFavorite()">☆</button>
           <div class="label">Spanish</div>
           <div class="spanish" id="cardSpanish">Loading...</div>
           <div class="tap-hint">Tap to reveal</div>
@@ -789,9 +810,12 @@
     </div>
 
     <div class="drill-controls">
-      <button class="btn-secondary" onclick="changeDeck('week')">Week</button>
-      <button class="btn-secondary" onclick="changeDeck('all')">All</button>
-      <button class="btn-secondary" onclick="changeDeck('custom')">My Words</button>
+      <div class="drill-filter-row">
+        <button class="btn-secondary" onclick="changeDeck('week')">Week</button>
+        <button class="btn-secondary" onclick="changeDeck('all')">All</button>
+        <button class="btn-secondary" onclick="changeDeck('custom')">My Words</button>
+        <button class="btn-secondary" onclick="changeDeck('favorites')">⭐ Faves</button>
+      </div>
       <button class="btn-primary" onclick="restartDrill()">Restart</button>
     </div>
   </section>
@@ -1247,6 +1271,17 @@ function buildDeck(mode) {
       return;
     }
     phrases = custom.map(p => ({ ...p, week: '★', title: 'My Words' }));
+  } else if (mode === 'favorites') {
+    const favs = loadFavorites();
+    if (favs.size === 0) {
+      alert('No favorites yet! Star some cards while drilling.');
+      return;
+    }
+    const allPhrases = [
+      ...getAllPhrases(),
+      ...loadCustomPhrases().map(p => ({ ...p, week: '★', title: 'My Words' })),
+    ];
+    phrases = allPhrases.filter(p => favs.has(p.es));
   } else {
     phrases = getAllPhrases();
   }
@@ -1257,6 +1292,45 @@ function buildDeck(mode) {
   flashTotal = 0;
   flashResults = [];
   updateScoreDisplay();
+}
+
+// ─── Favorites ────────────────────────────────────────────────────────────
+function loadFavorites() {
+  try { return new Set(JSON.parse(localStorage.getItem('card_favorites') || '[]')); }
+  catch { return new Set(); }
+}
+function saveFavorites(set) {
+  localStorage.setItem('card_favorites', JSON.stringify([...set]));
+}
+function toggleFavorite() {
+  if (flashIndex >= flashDeck.length) return;
+  const card = flashDeck[flashIndex];
+  const favs = loadFavorites();
+  if (favs.has(card.es)) { favs.delete(card.es); } else { favs.add(card.es); }
+  saveFavorites(favs);
+  updateStarBtn();
+}
+function updateStarBtn() {
+  const btn = document.getElementById('starBtn');
+  if (!btn || flashIndex >= flashDeck.length) return;
+  btn.textContent = loadFavorites().has(flashDeck[flashIndex].es) ? '⭐' : '☆';
+}
+
+function flashcardInnerHTML() {
+  return `
+    <div class="flashcard-inner" id="flashcardInner">
+      <div class="flashcard-face flashcard-front">
+        <button class="star-btn" id="starBtn" onclick="event.stopPropagation(); toggleFavorite()">☆</button>
+        <div class="label">Spanish</div>
+        <div class="spanish" id="cardSpanish"></div>
+        <div class="tap-hint">Tap to reveal</div>
+      </div>
+      <div class="flashcard-face flashcard-back">
+        <div class="label">English</div>
+        <div class="english" id="cardEnglish"></div>
+        <div class="week-tag" id="cardWeek"></div>
+      </div>
+    </div>`;
 }
 
 function renderCard() {
@@ -1273,6 +1347,7 @@ function renderCard() {
   document.getElementById('btnWrong').disabled = true;
   document.getElementById('btnRight').disabled = true;
   updateProgressTrack();
+  updateStarBtn();
 }
 
 function flipCard() {
@@ -1324,42 +1399,16 @@ function showSummary() {
 
 function changeDeck(mode) {
   buildDeck(mode);
-  document.getElementById('flashcardContainer').innerHTML = `
-    <div class="flashcard-container" id="flashcardContainer" onclick="flipCard()">
-      <div class="flashcard-inner" id="flashcardInner">
-        <div class="flashcard-face flashcard-front">
-          <div class="label">Spanish</div>
-          <div class="spanish" id="cardSpanish"></div>
-          <div class="tap-hint">Tap to reveal</div>
-        </div>
-        <div class="flashcard-face flashcard-back">
-          <div class="label">English</div>
-          <div class="english" id="cardEnglish"></div>
-          <div class="week-tag" id="cardWeek"></div>
-        </div>
-      </div>
-    </div>`;
-  document.getElementById('flashcardContainer').onclick = flipCard;
+  const container = document.getElementById('flashcardContainer');
+  container.innerHTML = flashcardInnerHTML();
+  container.onclick = flipCard;
   renderCard();
 }
 
 function restartDrill() {
   buildDeck(deckMode);
-  // Rebuild flashcard HTML in case it was replaced by summary
   const container = document.getElementById('flashcardContainer');
-  container.innerHTML = `
-      <div class="flashcard-inner" id="flashcardInner">
-        <div class="flashcard-face flashcard-front">
-          <div class="label">Spanish</div>
-          <div class="spanish" id="cardSpanish"></div>
-          <div class="tap-hint">Tap to reveal</div>
-        </div>
-        <div class="flashcard-face flashcard-back">
-          <div class="label">English</div>
-          <div class="english" id="cardEnglish"></div>
-          <div class="week-tag" id="cardWeek"></div>
-        </div>
-      </div>`;
+  container.innerHTML = flashcardInnerHTML();
   renderCard();
 }
 
