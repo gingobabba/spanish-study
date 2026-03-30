@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Spanish for Guadalajara</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --bg: #0f0f13;
@@ -894,6 +895,10 @@
 const STUDY_START = new Date('2026-03-29');
 const TRIP_DATE = new Date('2026-05-22');
 
+const SUPABASE_URL = 'https://pydmjjlzxvuaxsqxgkcr.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5ZG1qamx6eHZ1YXhzcXhna2NyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NDI4MjIsImV4cCI6MjA5MDQxODgyMn0.6dc0-HWWgHsr_UrKCVEamZEb66OZpcdL2x_e3fFZyCQ';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const weeks = [
   {
     num: 1,
@@ -1190,6 +1195,7 @@ let deckMode = 'week';
 let chatHistory = [];
 let activeScenario = null;
 let isTyping = false;
+let customPhrasesCache = [];
 
 // ============================================================
 // INIT
@@ -1657,17 +1663,10 @@ async function callClaude(userMessage, isStart) {
 }
 
 // ============================================================
-// MY WORDS — custom phrases stored in localStorage
+// MY WORDS — stored in Supabase
 // ============================================================
 function loadCustomPhrases() {
-  try {
-    return JSON.parse(localStorage.getItem('custom_phrases') || '[]');
-  } catch { return []; }
-}
-
-function saveCustomPhrases(phrases) {
-  localStorage.setItem('custom_phrases', JSON.stringify(phrases));
-  updateCustomBadge(phrases.length);
+  return customPhrasesCache;
 }
 
 function updateCustomBadge(count) {
@@ -1682,8 +1681,19 @@ function updateCustomBadge(count) {
   if (savedCount) savedCount.textContent = count > 0 ? `(${count})` : '';
 }
 
+async function syncCustomPhrases() {
+  const { data, error } = await sb
+    .from('custom_phrases')
+    .select('*')
+    .order('created_at', { ascending: true });
+  if (!error && data) {
+    customPhrasesCache = data.map(row => ({ id: row.id, es: row.spanish, en: row.english }));
+  }
+  renderCustomPhrases();
+}
+
 function renderCustomPhrases() {
-  const phrases = loadCustomPhrases();
+  const phrases = customPhrasesCache;
   const list = document.getElementById('customPhraseList');
   updateCustomBadge(phrases.length);
 
@@ -1696,18 +1706,18 @@ function renderCustomPhrases() {
     return;
   }
 
-  list.innerHTML = phrases.map((p, i) => `
+  list.innerHTML = phrases.map(p => `
     <li>
       <div class="custom-phrase-text">
         <span class="phrase-es">${escapeHtml(p.es)}</span>
         <span class="phrase-en">${escapeHtml(p.en)}</span>
       </div>
-      <button class="delete-btn" onclick="deleteCustomPhrase(${i})" title="Delete">×</button>
+      <button class="delete-btn" onclick="deleteCustomPhrase('${escapeHtml(p.id)}')" title="Delete">×</button>
     </li>
   `).join('');
 }
 
-function addCustomPhrase() {
+async function addCustomPhrase() {
   const esInput = document.getElementById('newSpanish');
   const enInput = document.getElementById('newEnglish');
   const es = esInput.value.trim();
@@ -1722,20 +1732,29 @@ function addCustomPhrase() {
   esInput.style.borderColor = 'var(--border)';
   enInput.style.borderColor = 'var(--border)';
 
-  const phrases = loadCustomPhrases();
-  phrases.push({ es, en });
-  saveCustomPhrases(phrases);
+  const btn = document.getElementById('addPhraseBtn');
+  btn.disabled = true;
 
-  esInput.value = '';
-  enInput.value = '';
-  esInput.focus();
-  renderCustomPhrases();
+  const { data, error } = await sb
+    .from('custom_phrases')
+    .insert({ spanish: es, english: en })
+    .select()
+    .single();
+
+  btn.disabled = false;
+
+  if (!error && data) {
+    customPhrasesCache.push({ id: data.id, es: data.spanish, en: data.english });
+    esInput.value = '';
+    enInput.value = '';
+    esInput.focus();
+    renderCustomPhrases();
+  }
 }
 
-function deleteCustomPhrase(index) {
-  const phrases = loadCustomPhrases();
-  phrases.splice(index, 1);
-  saveCustomPhrases(phrases);
+async function deleteCustomPhrase(id) {
+  await sb.from('custom_phrases').delete().eq('id', id);
+  customPhrasesCache = customPhrasesCache.filter(p => p.id !== id);
   renderCustomPhrases();
 }
 
@@ -1751,7 +1770,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('newSpanish').addEventListener('keydown', e => {
     if (e.key === 'Enter') document.getElementById('newEnglish').focus();
   });
-  renderCustomPhrases();
+  syncCustomPhrases();
 });
 
 // ============================================================
