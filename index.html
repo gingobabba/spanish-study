@@ -70,12 +70,12 @@
     }
     nav button {
       flex: 1;
-      padding: 12px 4px;
+      padding: 12px 2px;
       background: none;
       border: none;
       border-bottom: 2px solid transparent;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 10px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.15s;
@@ -594,6 +594,84 @@
       border-top: 1px solid var(--border);
     }
 
+    /* --- MY WORDS --- */
+    .add-phrase-form {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .add-phrase-form input {
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 15px;
+      width: 100%;
+    }
+    .add-phrase-form input::placeholder { color: var(--muted); }
+    .add-phrase-form input:focus { outline: none; border-color: var(--accent); }
+    .add-phrase-btn {
+      padding: 13px;
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .add-phrase-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .custom-phrase-list { list-style: none; }
+    .custom-phrase-list li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .custom-phrase-list li:last-child { border-bottom: none; }
+    .custom-phrase-text {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .delete-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 6px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .delete-btn:hover { color: var(--red); background: rgba(232,90,90,0.1); }
+
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      padding: 30px 20px;
+      font-size: 14px;
+    }
+    .empty-state .icon { font-size: 32px; margin-bottom: 8px; }
+
+    .custom-count-badge {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+
     /* Scrollbar */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -611,6 +689,7 @@
   <button class="active" onclick="switchTab('lesson', this)">Today</button>
   <button onclick="switchTab('flashcard', this)">Flashcards</button>
   <button onclick="switchTab('simulator', this)">Simulator</button>
+  <button onclick="switchTab('mywords', this)">My Words <span class="custom-count-badge" id="customCountBadge" style="display:none"></span></button>
 </nav>
 
 <main>
@@ -694,8 +773,9 @@
     </div>
 
     <div class="drill-controls">
-      <button class="btn-secondary" onclick="changeDeck('week')">Week Only</button>
-      <button class="btn-secondary" onclick="changeDeck('all')">All Phrases</button>
+      <button class="btn-secondary" onclick="changeDeck('week')">Week</button>
+      <button class="btn-secondary" onclick="changeDeck('all')">All</button>
+      <button class="btn-secondary" onclick="changeDeck('custom')">My Words</button>
       <button class="btn-primary" onclick="restartDrill()">Restart</button>
     </div>
   </section>
@@ -743,6 +823,23 @@
       <input type="text" id="chatInput" placeholder="Escribe en español..." disabled
         onkeydown="if(event.key==='Enter') sendMessage()" />
       <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>➤</button>
+    </div>
+  </section>
+
+  <!-- MY WORDS -->
+  <section id="mywords" class="section">
+    <div class="card" style="margin-bottom:16px">
+      <h3>Add a New Phrase</h3>
+      <div class="add-phrase-form" style="margin-top:12px">
+        <input type="text" id="newSpanish" placeholder="Spanish — e.g. ¿Dónde está el baño?" />
+        <input type="text" id="newEnglish" placeholder="English — e.g. Where is the bathroom?" />
+        <button class="add-phrase-btn" id="addPhraseBtn" onclick="addCustomPhrase()">+ Add Phrase</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>My Saved Phrases <span id="savedCount" style="color:var(--accent)"></span></h3>
+      <ul class="custom-phrase-list" id="customPhraseList"></ul>
     </div>
   </section>
 
@@ -1127,6 +1224,13 @@ function buildDeck(mode) {
   let phrases;
   if (mode === 'week') {
     phrases = currentWeek.phrases.map(p => ({ ...p, week: currentWeek.num, title: currentWeek.title }));
+  } else if (mode === 'custom') {
+    const custom = loadCustomPhrases();
+    if (custom.length === 0) {
+      alert('No custom phrases yet! Add some in the My Words tab first.');
+      return;
+    }
+    phrases = custom.map(p => ({ ...p, week: '★', title: 'My Words' }));
   } else {
     phrases = getAllPhrases();
   }
@@ -1391,6 +1495,104 @@ async function callClaude(userMessage, isStart) {
     document.getElementById('sendBtn').disabled = false;
   }
 }
+
+// ============================================================
+// MY WORDS — custom phrases stored in localStorage
+// ============================================================
+function loadCustomPhrases() {
+  try {
+    return JSON.parse(localStorage.getItem('custom_phrases') || '[]');
+  } catch { return []; }
+}
+
+function saveCustomPhrases(phrases) {
+  localStorage.setItem('custom_phrases', JSON.stringify(phrases));
+  updateCustomBadge(phrases.length);
+}
+
+function updateCustomBadge(count) {
+  const badge = document.getElementById('customCountBadge');
+  if (count > 0) {
+    badge.textContent = count;
+    badge.style.display = 'inline-block';
+  } else {
+    badge.style.display = 'none';
+  }
+  const savedCount = document.getElementById('savedCount');
+  if (savedCount) savedCount.textContent = count > 0 ? `(${count})` : '';
+}
+
+function renderCustomPhrases() {
+  const phrases = loadCustomPhrases();
+  const list = document.getElementById('customPhraseList');
+  updateCustomBadge(phrases.length);
+
+  if (phrases.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">📝</div>
+        <div>No phrases yet. Add words you pick up from conversations, signs, or the simulator!</div>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = phrases.map((p, i) => `
+    <li>
+      <div class="custom-phrase-text">
+        <span class="phrase-es">${escapeHtml(p.es)}</span>
+        <span class="phrase-en">${escapeHtml(p.en)}</span>
+      </div>
+      <button class="delete-btn" onclick="deleteCustomPhrase(${i})" title="Delete">×</button>
+    </li>
+  `).join('');
+}
+
+function addCustomPhrase() {
+  const esInput = document.getElementById('newSpanish');
+  const enInput = document.getElementById('newEnglish');
+  const es = esInput.value.trim();
+  const en = enInput.value.trim();
+
+  if (!es || !en) {
+    esInput.style.borderColor = !es ? 'var(--red)' : 'var(--border)';
+    enInput.style.borderColor = !en ? 'var(--red)' : 'var(--border)';
+    return;
+  }
+
+  esInput.style.borderColor = 'var(--border)';
+  enInput.style.borderColor = 'var(--border)';
+
+  const phrases = loadCustomPhrases();
+  phrases.push({ es, en });
+  saveCustomPhrases(phrases);
+
+  esInput.value = '';
+  enInput.value = '';
+  esInput.focus();
+  renderCustomPhrases();
+}
+
+function deleteCustomPhrase(index) {
+  const phrases = loadCustomPhrases();
+  phrases.splice(index, 1);
+  saveCustomPhrases(phrases);
+  renderCustomPhrases();
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Allow Enter key in the English field to submit
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('newEnglish').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addCustomPhrase();
+  });
+  document.getElementById('newSpanish').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('newEnglish').focus();
+  });
+  renderCustomPhrases();
+});
 
 // ============================================================
 // BOOT
