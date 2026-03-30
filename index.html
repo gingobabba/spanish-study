@@ -1795,10 +1795,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') document.getElementById('newEnglish').focus();
   });
   syncCustomPhrases();
-  // Hide migrate card if nothing in localStorage
-  let local = [];
-  try { local = JSON.parse(localStorage.getItem('custom_phrases') || '[]'); } catch {}
-  if (local.length === 0) document.getElementById('migrateCard').style.display = 'none';
 });
 
 // ============================================================
