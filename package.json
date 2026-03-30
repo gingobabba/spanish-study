@@ -1,0 +1,16 @@
+{
+  "name": "spanish-guadalajara-notifier",
+  "version": "1.0.0",
+  "description": "Daily Telegram reminders for Spanish study before Guadalajara trip",
+  "scripts": {
+    "test-message":   "node send-message.js morning",
+    "test-morning":   "node send-message.js morning",
+    "test-evening":   "node send-message.js evening"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

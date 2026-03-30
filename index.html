@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spanish for Guadalajara</title>
+  <style>
+    :root {
+      --bg: #0f0f13;
+      --surface: #1a1a24;
+      --surface2: #242433;
+      --border: #2e2e42;
+      --accent: #e8643a;
+      --accent2: #c94f28;
+      --green: #3abf7e;
+      --red: #e85a5a;
+      --text: #f0f0f5;
+      --muted: #8888aa;
+      --card: #1e1e2e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      padding: 16px 20px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
+    }
+    header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.3px;
+    }
+    .trip-badge {
+      font-size: 11px;
+      color: var(--muted);
+      background: var(--surface);
+      padding: 3px 8px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+
+    /* Nav tabs */
+    nav {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      position: sticky;
+      top: 57px;
+      z-index: 9;
+    }
+    nav button {
+      flex: 1;
+      padding: 12px 4px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+    nav button.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    nav button:hover:not(.active) { color: var(--text); }
+
+    /* Main content */
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    /* Sections */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* --- TODAY'S LESSON --- */
+    .week-header {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+    }
+    .week-header .week-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      opacity: 0.8;
+      margin-bottom: 4px;
+    }
+    .week-header h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .week-header .goal { font-size: 14px; opacity: 0.9; line-height: 1.4; }
+
+    .progress-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .progress-pill {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      text-align: center;
+    }
+    .progress-pill .num {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .progress-pill .lbl {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .card h3 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .phrase-list { list-style: none; }
+    .phrase-list li {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .phrase-list li:last-child { border-bottom: none; }
+    .phrase-es { font-size: 15px; font-weight: 600; }
+    .phrase-en { font-size: 13px; color: var(--muted); }
+
+    .routine-list { list-style: none; }
+    .routine-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 0;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+      line-height: 1.4;
+    }
+    .routine-list li:last-child { border-bottom: none; }
+    .routine-time {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(232,100,58,0.12);
+      padding: 2px 6px;
+      border-radius: 4px;
+      min-width: 62px;
+      text-align: center;
+      margin-top: 1px;
+    }
+
+    .countdown-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .countdown-bar .days {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .countdown-bar .info { flex: 1; }
+    .countdown-bar .info .top { font-size: 14px; font-weight: 600; }
+    .countdown-bar .info .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .week-progress-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-top: 6px;
+    }
+    .week-progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+
+    /* --- FLASHCARD --- */
+    .flashcard-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .score-display {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .score-display span { color: var(--text); font-weight: 700; }
+
+    .flashcard-container {
+      perspective: 1000px;
+      margin-bottom: 20px;
+      cursor: pointer;
+    }
+    .flashcard-inner {
+      position: relative;
+      width: 100%;
+      height: 220px;
+      transition: transform 0.45s cubic-bezier(0.4,0,0.2,1);
+      transform-style: preserve-3d;
+    }
+    .flashcard-inner.flipped { transform: rotateY(180deg); }
+
+    .flashcard-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+    .flashcard-front {
+      background: linear-gradient(145deg, var(--surface2), var(--card));
+      border: 1px solid var(--border);
+    }
+    .flashcard-back {
+      background: linear-gradient(145deg, #1a2a1e, #162218);
+      border: 1px solid #2a4030;
+      transform: rotateY(180deg);
+    }
+    .flashcard-face .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+    .flashcard-face .spanish {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+    .flashcard-face .english {
+      font-size: 17px;
+      color: var(--green);
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    .flashcard-face .tap-hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 14px;
+    }
+    .flashcard-face .week-tag {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 8px;
+      background: rgba(255,255,255,0.05);
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    .answer-buttons {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .answer-buttons button {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .answer-buttons button:active { transform: scale(0.97); }
+    .btn-wrong {
+      background: rgba(232,90,90,0.15);
+      color: var(--red);
+      border: 1px solid rgba(232,90,90,0.3) !important;
+    }
+    .btn-right {
+      background: rgba(58,191,126,0.15);
+      color: var(--green);
+      border: 1px solid rgba(58,191,126,0.3) !important;
+    }
+    .answer-buttons button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .progress-track {
+      display: flex;
+      gap: 3px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+    }
+    .dot.correct { background: var(--green); }
+    .dot.wrong { background: var(--red); }
+
+    .drill-controls {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-secondary {
+      flex: 1;
+      padding: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-primary {
+      flex: 1;
+      padding: 12px;
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .session-summary {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .session-summary .big { font-size: 42px; font-weight: 800; color: var(--accent); }
+    .session-summary .sub { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+    /* --- SIMULATOR --- */
+    .scenario-select {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .scenario-select label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+    .scenario-select select {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 15px;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .api-key-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .api-key-row label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--muted);
+    }
+    .api-key-row input {
+      padding: 11px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: monospace;
+      width: 100%;
+    }
+    .api-key-row input::placeholder { color: var(--muted); }
+    .api-key-note {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .chat-window {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      min-height: 300px;
+      max-height: 380px;
+      overflow-y: auto;
+      padding: 14px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .chat-empty {
+      margin: auto;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      padding: 20px;
+    }
+    .chat-empty .icon { font-size: 32px; margin-bottom: 8px; }
+
+    .msg {
+      max-width: 88%;
+      padding: 10px 13px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .msg-user {
+      align-self: flex-end;
+      background: var(--accent);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    .msg-ai {
+      align-self: flex-start;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 4px;
+    }
+    .msg-correction {
+      align-self: flex-start;
+      background: rgba(232,90,90,0.08);
+      border: 1px solid rgba(232,90,90,0.2);
+      color: #ffaaaa;
+      font-size: 12px;
+      border-radius: 8px;
+      padding: 7px 11px;
+      max-width: 92%;
+    }
+    .msg-correction strong { color: var(--red); }
+
+    .msg-typing {
+      align-self: flex-start;
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      border-radius: 14px;
+      border-bottom-left-radius: 4px;
+    }
+    .typing-dots { display: flex; gap: 4px; align-items: center; }
+    .typing-dots span {
+      width: 6px; height: 6px;
+      background: var(--muted);
+      border-radius: 50%;
+      animation: blink 1.4s infinite;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink {
+      0%, 80%, 100% { opacity: 0.3; transform: scale(0.9); }
+      40% { opacity: 1; transform: scale(1); }
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 8px;
+    }
+    .chat-input-row input {
+      flex: 1;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 15px;
+    }
+    .chat-input-row input::placeholder { color: var(--muted); }
+    .chat-input-row input:focus { outline: none; border-color: var(--accent); }
+    .send-btn {
+      padding: 12px 16px;
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .sim-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .start-btn {
+      flex: 1;
+      padding: 13px;
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .clear-btn {
+      padding: 13px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .scenario-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      background: rgba(232,100,58,0.12);
+      color: var(--accent);
+      border: 1px solid rgba(232,100,58,0.2);
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+
+    /* Footer */
+    footer {
+      padding: 12px 20px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🇲🇽 Español</h1>
+  <div class="trip-badge">✈️ Guadalajara • May 22</div>
+</header>
+
+<nav>
+  <button class="active" onclick="switchTab('lesson', this)">Today</button>
+  <button onclick="switchTab('flashcard', this)">Flashcards</button>
+  <button onclick="switchTab('simulator', this)">Simulator</button>
+</nav>
+
+<main>
+
+  <!-- TODAY'S LESSON -->
+  <section id="lesson" class="section active">
+    <div class="countdown-bar">
+      <div class="days" id="daysLeft">—</div>
+      <div class="info">
+        <div class="top">Days until Guadalajara</div>
+        <div class="sub" id="weekProgressLabel">Loading...</div>
+        <div class="week-progress-bar">
+          <div class="week-progress-fill" id="weekProgressFill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="week-header">
+      <div class="week-label" id="weekLabel">Week —</div>
+      <h2 id="weekTitle">Loading...</h2>
+      <div class="goal" id="weekGoal"></div>
+    </div>
+
+    <div class="progress-row">
+      <div class="progress-pill">
+        <div class="num" id="phrasesCount">—</div>
+        <div class="lbl">Phrases</div>
+      </div>
+      <div class="progress-pill">
+        <div class="num" id="weekNum">—</div>
+        <div class="lbl">Week</div>
+      </div>
+      <div class="progress-pill">
+        <div class="num" id="totalWeeks">8</div>
+        <div class="lbl">Total</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>This Week's Phrases</h3>
+      <ul class="phrase-list" id="phraseList"></ul>
+    </div>
+
+    <div class="card">
+      <h3>Daily Routine</h3>
+      <ul class="routine-list" id="routineList"></ul>
+    </div>
+  </section>
+
+  <!-- FLASHCARD DRILL -->
+  <section id="flashcard" class="section">
+    <div class="flashcard-meta">
+      <div class="score-display">
+        Correct: <span id="correctCount">0</span> / <span id="totalCount">0</span>
+      </div>
+      <div class="score-display">
+        Session: <span id="sessionPct">—</span>
+      </div>
+    </div>
+
+    <div class="progress-track" id="progressTrack"></div>
+
+    <div class="flashcard-container" id="flashcardContainer" onclick="flipCard()">
+      <div class="flashcard-inner" id="flashcardInner">
+        <div class="flashcard-face flashcard-front">
+          <div class="label">Spanish</div>
+          <div class="spanish" id="cardSpanish">Loading...</div>
+          <div class="tap-hint">Tap to reveal</div>
+        </div>
+        <div class="flashcard-face flashcard-back">
+          <div class="label">English</div>
+          <div class="english" id="cardEnglish"></div>
+          <div class="week-tag" id="cardWeek"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="answer-buttons" id="answerButtons">
+      <button class="btn-wrong" id="btnWrong" onclick="markAnswer(false)" disabled>✗ Miss</button>
+      <button class="btn-right" id="btnRight" onclick="markAnswer(true)" disabled>✓ Got it</button>
+    </div>
+
+    <div class="drill-controls">
+      <button class="btn-secondary" onclick="changeDeck('week')">Week Only</button>
+      <button class="btn-secondary" onclick="changeDeck('all')">All Phrases</button>
+      <button class="btn-primary" onclick="restartDrill()">Restart</button>
+    </div>
+  </section>
+
+  <!-- CONVERSATION SIMULATOR -->
+  <section id="simulator" class="section">
+    <div class="api-key-row">
+      <label>Anthropic API Key</label>
+      <input type="password" id="apiKeyInput" placeholder="sk-ant-..." />
+      <div class="api-key-note">Stored locally in your browser. Never sent anywhere except Anthropic.</div>
+    </div>
+
+    <div class="scenario-select">
+      <label>Scenario</label>
+      <select id="scenarioSelect">
+        <option value="meeting">👋 Meeting someone new</option>
+        <option value="restaurant">🍽️ Ordering food at a restaurant</option>
+        <option value="directions">🗺️ Asking for directions</option>
+        <option value="market">🛍️ Shopping at a market</option>
+        <option value="cantina">🍺 Chatting at a cantina</option>
+        <option value="emergency">🆘 Asking for help / emergency</option>
+        <option value="taxi">🚕 Taking a taxi</option>
+        <option value="hotel">🏨 Checking into a hotel</option>
+      </select>
+    </div>
+
+    <div class="sim-controls">
+      <button class="start-btn" onclick="startSimulation()">▶ Start Scenario</button>
+      <button class="clear-btn" onclick="clearChat()">Clear</button>
+    </div>
+
+    <div class="scenario-badge" id="activeBadge" style="display:none">
+      <span id="badgeIcon"></span>
+      <span id="badgeText"></span>
+    </div>
+
+    <div class="chat-window" id="chatWindow">
+      <div class="chat-empty">
+        <div class="icon">💬</div>
+        <div>Choose a scenario and tap Start to begin practicing your Spanish conversation.</div>
+      </div>
+    </div>
+
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="Escribe en español..." disabled
+        onkeydown="if(event.key==='Enter') sendMessage()" />
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>➤</button>
+    </div>
+  </section>
+
+</main>
+
+<footer>Guadalajara Trip • May 22, 2026 • Buena suerte 🌟</footer>
+
+<script>
+// ============================================================
+// DATA — parsed from spanish_study_plan.md
+// ============================================================
+const STUDY_START = new Date('2026-03-29');
+const TRIP_DATE = new Date('2026-05-22');
+
+const weeks = [
+  {
+    num: 1,
+    title: 'Greetings & Basic Introductions',
+    goal: 'Confidently greet people and introduce yourself in Guadalajara.',
+    routine: [
+      { time: 'Morning', task: 'Review 5 phrases out loud' },
+      { time: 'Afternoon', task: 'Flashcard drill for 10 minutes' },
+      { time: 'Evening', task: 'Practice one short conversation with the simulator' },
+    ],
+    phrases: [
+      { es: 'Hola, ¿cómo estás?', en: 'Hello, how are you?' },
+      { es: 'Muy bien, gracias. ¿Y tú?', en: 'Very well, thanks. And you?' },
+      { es: 'Me llamo [nombre].', en: 'My name is [name].' },
+      { es: 'Mucho gusto.', en: 'Nice to meet you.' },
+      { es: '¿De dónde eres?', en: 'Where are you from?' },
+      { es: 'Soy de los Estados Unidos.', en: "I'm from the United States." },
+      { es: '¿Hablas inglés?', en: 'Do you speak English?' },
+      { es: 'Hablo un poco de español.', en: 'I speak a little Spanish.' },
+      { es: 'Por favor, habla más despacio.', en: 'Please speak more slowly.' },
+      { es: 'No entiendo.', en: "I don't understand." },
+      { es: '¿Puedes repetir eso?', en: 'Can you repeat that?' },
+      { es: 'Encantado/Encantada.', en: 'Pleased to meet you.' },
+    ]
+  },
+  {
+    num: 2,
+    title: 'Numbers, Time & Dates',
+    goal: 'Handle prices, schedules, and dates with ease.',
+    routine: [
+      { time: 'Morning', task: 'Count objects around you in Spanish' },
+      { time: 'Afternoon', task: 'Flashcard drill focusing on numbers' },
+      { time: 'Evening', task: 'Simulate buying a ticket or asking for the time' },
+    ],
+    phrases: [
+      { es: '¿Cuánto cuesta?', en: 'How much does it cost?' },
+      { es: 'Son veinte pesos.', en: "It's twenty pesos." },
+      { es: '¿Qué hora es?', en: 'What time is it?' },
+      { es: 'Son las tres de la tarde.', en: "It's 3 in the afternoon." },
+      { es: '¿A qué hora abre?', en: 'What time does it open?' },
+      { es: '¿A qué hora cierra?', en: 'What time does it close?' },
+      { es: 'Hoy es lunes.', en: 'Today is Monday.' },
+      { es: 'Mañana es martes.', en: 'Tomorrow is Tuesday.' },
+      { es: 'La semana que viene.', en: 'Next week.' },
+      { es: '¿Cuántos años tienes?', en: 'How old are you?' },
+      { es: 'Tengo treinta años.', en: 'I am thirty years old.' },
+      { es: 'El cinco de mayo.', en: 'The fifth of May.' },
+    ]
+  },
+  {
+    num: 3,
+    title: 'Food & Ordering at Restaurants',
+    goal: 'Order tapatío food confidently — tortas ahogadas, birria, and more.',
+    routine: [
+      { time: 'Morning', task: 'Review menu vocabulary' },
+      { time: 'Afternoon', task: 'Flashcard drill on food phrases' },
+      { time: 'Evening', task: 'Simulate ordering at a Guadalajara restaurant' },
+    ],
+    phrases: [
+      { es: 'Una mesa para dos, por favor.', en: 'A table for two, please.' },
+      { es: '¿Me puede traer la carta?', en: 'Can you bring me the menu?' },
+      { es: '¿Qué recomienda usted?', en: 'What do you recommend?' },
+      { es: 'Quiero una torta ahogada, por favor.', en: "I'd like a torta ahogada, please." },
+      { es: '¿Tiene opciones vegetarianas?', en: 'Do you have vegetarian options?' },
+      { es: 'La cuenta, por favor.', en: 'The bill, please.' },
+      { es: 'Está delicioso.', en: "It's delicious." },
+      { es: 'Sin chile, por favor.', en: 'Without chili, please.' },
+      { es: '¿Está incluida la propina?', en: 'Is the tip included?' },
+      { es: 'Dos cervezas, por favor.', en: 'Two beers, please.' },
+      { es: '¿Qué lleva este platillo?', en: 'What does this dish have in it?' },
+      { es: 'Me gustaría pedir...', en: 'I would like to order...' },
+    ]
+  },
+  {
+    num: 4,
+    title: 'Directions & Getting Around',
+    goal: "Navigate Guadalajara's streets, take the tren ligero, and find landmarks.",
+    routine: [
+      { time: 'Morning', task: 'Study a map of Guadalajara Centro and say directions out loud' },
+      { time: 'Afternoon', task: 'Flashcard drill on directions' },
+      { time: 'Evening', task: 'Simulate asking for directions to Hospicio Cabañas' },
+    ],
+    phrases: [
+      { es: '¿Dónde está...?', en: 'Where is...?' },
+      { es: '¿Cómo llego al centro histórico?', en: 'How do I get to the historic center?' },
+      { es: 'Siga recto.', en: 'Go straight.' },
+      { es: 'Doble a la derecha.', en: 'Turn right.' },
+      { es: 'Doble a la izquierda.', en: 'Turn left.' },
+      { es: 'Está a dos cuadras.', en: "It's two blocks away." },
+      { es: '¿Hay una parada de metro cerca?', en: 'Is there a metro stop nearby?' },
+      { es: 'Quiero ir a Tlaquepaque.', en: 'I want to go to Tlaquepaque.' },
+      { es: '¿Cuánto tarda en llegar?', en: 'How long does it take to get there?' },
+      { es: 'Llámeme un taxi, por favor.', en: 'Please call me a taxi.' },
+      { es: '¿Para aquí el camión?', en: 'Does the bus stop here?' },
+      { es: 'Estoy perdido/perdida.', en: "I'm lost." },
+    ]
+  },
+  {
+    num: 5,
+    title: 'Shopping & Markets',
+    goal: 'Bargain at Mercado San Juan de Dios and shop in Tlaquepaque.',
+    routine: [
+      { time: 'Morning', task: 'Review shopping vocabulary' },
+      { time: 'Afternoon', task: 'Flashcard drill on market phrases' },
+      { time: 'Evening', task: 'Simulate haggling at a craft market' },
+    ],
+    phrases: [
+      { es: '¿Cuánto cuesta esto?', en: 'How much is this?' },
+      { es: '¿Tiene algo más barato?', en: 'Do you have something cheaper?' },
+      { es: '¿Me puede hacer un descuento?', en: 'Can you give me a discount?' },
+      { es: 'Me lo llevo.', en: "I'll take it." },
+      { es: 'Solo estoy mirando.', en: "I'm just browsing." },
+      { es: '¿Aceptan tarjeta?', en: 'Do you accept cards?' },
+      { es: '¿Dónde están los artesanías?', en: 'Where are the handicrafts?' },
+      { es: 'Es un regalo.', en: "It's a gift." },
+      { es: '¿Tiene esto en otro color?', en: 'Do you have this in another color?' },
+      { es: '¿Puedo probármelo?', en: 'Can I try it on?' },
+      { es: 'Es demasiado caro.', en: "It's too expensive." },
+      { es: 'Voy a pensarlo.', en: "I'll think about it." },
+    ]
+  },
+  {
+    num: 6,
+    title: 'Social Situations & Making Friends',
+    goal: 'Have real conversations with locals — at a cantina, a party, or on the street.',
+    routine: [
+      { time: 'Morning', task: 'Review social phrases and small talk' },
+      { time: 'Afternoon', task: 'Flashcard drill' },
+      { time: 'Evening', task: 'Simulate meeting someone at a tapatío cantina' },
+    ],
+    phrases: [
+      { es: '¿Eres de Guadalajara?', en: 'Are you from Guadalajara?' },
+      { es: '¿Qué haces aquí?', en: 'What are you doing here?' },
+      { es: 'Estoy de visita.', en: "I'm visiting." },
+      { es: 'Me encanta tu ciudad.', en: 'I love your city.' },
+      { es: '¿Cuál es tu lugar favorito en Guadalajara?', en: "What's your favorite place in Guadalajara?" },
+      { es: '¿Me recomiendas algún lugar?', en: 'Do you recommend a place?' },
+      { es: '¿Quieres tomar algo?', en: 'Do you want to grab a drink?' },
+      { es: '¡Salud!', en: 'Cheers!' },
+      { es: 'Fue un placer conocerte.', en: 'It was a pleasure meeting you.' },
+      { es: '¿Puedo tener tu número?', en: 'Can I have your number?' },
+      { es: 'Nos vemos después.', en: 'See you later.' },
+      { es: '¡Qué padre!', en: 'How cool! (Mexican slang)' },
+    ]
+  },
+  {
+    num: 7,
+    title: 'Emergencies & Practical Needs',
+    goal: 'Handle unexpected situations — health issues, getting help, and staying safe.',
+    routine: [
+      { time: 'Morning', task: 'Review emergency vocabulary' },
+      { time: 'Afternoon', task: 'Flashcard drill' },
+      { time: 'Evening', task: 'Simulate a scenario where you need help' },
+    ],
+    phrases: [
+      { es: 'Necesito ayuda.', en: 'I need help.' },
+      { es: '¡Llame a la policía!', en: 'Call the police!' },
+      { es: 'Necesito un médico.', en: 'I need a doctor.' },
+      { es: 'Me robaron.', en: 'I was robbed.' },
+      { es: 'Perdí mi pasaporte.', en: 'I lost my passport.' },
+      { es: '¿Dónde está el hospital más cercano?', en: 'Where is the nearest hospital?' },
+      { es: 'Me siento mal.', en: 'I feel sick.' },
+      { es: 'Tengo alergias a...', en: "I'm allergic to..." },
+      { es: '¿Hay una farmacia cerca?', en: 'Is there a pharmacy nearby?' },
+      { es: 'Necesito llamar a mi embajada.', en: 'I need to call my embassy.' },
+      { es: 'No hablo bien español.', en: "I don't speak Spanish well." },
+      { es: '¿Hay alguien que hable inglés?', en: 'Is there anyone who speaks English?' },
+    ]
+  },
+  {
+    num: 8,
+    title: 'Review & Guadalajara Specifics',
+    goal: 'Final polish — local slang, key landmarks, and full confidence.',
+    routine: [
+      { time: 'Morning', task: 'Full review of all weeks' },
+      { time: 'Afternoon', task: 'Rapid flashcard drill across all phrases' },
+      { time: 'Evening', task: 'Full conversation simulation covering multiple scenarios' },
+    ],
+    phrases: [
+      { es: '¡Órale!', en: 'All right! / Let\'s go! (Mexican)' },
+      { es: '¡Está cañón!', en: "It's intense/tough! (Mexican slang)" },
+      { es: '¿Qué onda?', en: "What's up? (Mexican casual)" },
+      { es: 'Chido/Chida', en: 'Cool (Mexican slang)' },
+      { es: 'No manches.', en: 'No way! / Are you serious? (Mexican)' },
+      { es: 'Quiero visitar el Hospicio Cabañas.', en: 'I want to visit Hospicio Cabañas.' },
+      { es: '¿Dónde puedo ver la lucha libre?', en: 'Where can I watch lucha libre?' },
+      { es: '¿A qué hora es el partido de Chivas?', en: 'What time is the Chivas game?' },
+      { es: 'El mariachi es de Jalisco.', en: 'Mariachi music is from Jalisco.' },
+      { es: 'Quiero probar la birria de chivo.', en: 'I want to try goat birria.' },
+      { es: '¿Dónde queda la Catedral de Guadalajara?', en: 'Where is the Guadalajara Cathedral?' },
+      { es: 'Muchas gracias por todo.', en: 'Thank you for everything.' },
+    ]
+  }
+];
+
+const scenarios = {
+  meeting: {
+    icon: '👋',
+    label: 'Meeting someone new',
+    system: `You are playing a friendly local named Carlos in Guadalajara, Mexico. The user is an American tourist practicing Spanish.
+Rules:
+- Respond ONLY in Spanish. Keep responses short (1-3 sentences).
+- Stay in character as a friendly tapatío (Guadalajara local).
+- If the user makes a grammar or vocabulary mistake, FIRST respond naturally in Spanish continuing the conversation, THEN add a correction note in this exact format on a new line: [CORRECTION: "what they said" → "correct form" — brief explanation]
+- Be warm, use Mexican expressions naturally (órale, ¡qué padre!, etc.).
+- The scenario: you just met this tourist near the Catedral de Guadalajara.`
+  },
+  restaurant: {
+    icon: '🍽️',
+    label: 'Ordering at a restaurant',
+    system: `You are playing a waiter named Rodrigo at a traditional tapatío restaurant in Guadalajara. The user is practicing ordering food in Spanish.
+Rules:
+- Respond ONLY in Spanish. Keep responses short and natural for a waiter.
+- Offer real Guadalajara dishes: tortas ahogadas, birria, pozole, enchiladas tapatías, tejuino.
+- If the user makes a grammar or vocabulary mistake, respond naturally first, THEN add: [CORRECTION: "what they said" → "correct form" — brief explanation]
+- Start by welcoming the guest to the restaurant.`
+  },
+  directions: {
+    icon: '🗺️',
+    label: 'Asking for directions',
+    system: `You are a friendly local in Guadalajara helping a tourist find their way. The user needs directions to a famous landmark.
+Rules:
+- Respond ONLY in Spanish.
+- Give realistic Guadalajara directions using local references (Centro histórico, Hospicio Cabañas, Mercado Libertad, Tlaquepaque, etc.)
+- If the user makes a grammar or vocabulary mistake, respond naturally first, THEN add: [CORRECTION: "what they said" → "correct form" — brief explanation]
+- Start by asking where they want to go.`
+  },
+  market: {
+    icon: '🛍️',
+    label: 'Shopping at a market',
+    system: `You are a vendor at Mercado San Juan de Dios in Guadalajara, selling artesanías (handicrafts). The user wants to buy something.
+Rules:
+- Respond ONLY in Spanish.
+- Haggle a little — start with a higher price, be willing to negotiate.
+- Describe items enthusiastically using Mexican market vendor energy.
+- If the user makes a grammar or vocabulary mistake: [CORRECTION: "what they said" → "correct form" — brief explanation]
+- Start by calling out to attract the tourist's attention.`
+  },
+  cantina: {
+    icon: '🍺',
+    label: 'Chatting at a cantina',
+    system: `You are a friendly local named Miguel at a traditional cantina in Guadalajara. The user is sitting next to you at the bar.
+Rules:
+- Respond ONLY in Spanish. Be casual and friendly.
+- Use Mexican slang naturally: ¿qué onda?, órale, chido, no manches, etc.
+- Talk about Guadalajara things: Chivas, mariachi, tequila from Jalisco, local food.
+- If the user makes a mistake: [CORRECTION: "what they said" → "correct form" — brief explanation]
+- Start by offering to buy them a mezcal.`
+  },
+  emergency: {
+    icon: '🆘',
+    label: 'Asking for help',
+    system: `You are a helpful police officer (policía) or passerby in Guadalajara. The user needs help with an emergency situation.
+Rules:
+- Respond ONLY in Spanish. Be calm, helpful, and clear.
+- Keep responses simple and direct since it's a stressful situation.
+- If the user makes a mistake: [CORRECTION: "what they said" → "correct form" — brief explanation]
+- Ask what the problem is to start the scenario.`
+  },
+  taxi: {
+    icon: '🚕',
+    label: 'Taking a taxi',
+    system: `You are a taxi driver in Guadalajara. The user wants to go somewhere.
+Rules:
+- Respond ONLY in Spanish. Be friendly but also a bit business-like (taxi driver energy).
+- Know Guadalajara locations: airport, Centro, Tlaquepaque, Zapopan, Tonalá, Plaza del Sol.
+- Mention approximate prices in pesos.
+- If the user makes a mistake: [CORRECTION: "what they said" → "correct form" — brief explanation]
+- Start by asking where they're going.`
+  },
+  hotel: {
+    icon: '🏨',
+    label: 'Checking into a hotel',
+    system: `You are a hotel receptionist at a nice hotel in Guadalajara Centro. The user is checking in.
+Rules:
+- Respond ONLY in Spanish. Be professional and welcoming.
+- Handle typical hotel check-in: reservation, room type, breakfast, amenities.
+- If the user makes a mistake: [CORRECTION: "what they said" → "correct form" — brief explanation]
+- Start by welcoming the guest and asking for their name and reservation.`
+  }
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let currentWeek = null;
+let flashDeck = [];
+let flashIndex = 0;
+let flashCorrect = 0;
+let flashTotal = 0;
+let flashResults = [];
+let isFlipped = false;
+let deckMode = 'week';
+let chatHistory = [];
+let activeScenario = null;
+let isTyping = false;
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const tripDate = new Date(TRIP_DATE);
+  tripDate.setHours(0,0,0,0);
+  const daysLeft = Math.max(0, Math.ceil((tripDate - today) / 86400000));
+  document.getElementById('daysLeft').textContent = daysLeft;
+
+  // Figure out current week
+  const startDate = new Date(STUDY_START);
+  startDate.setHours(0,0,0,0);
+  const daysSinceStart = Math.floor((today - startDate) / 86400000);
+  const weekIndex = Math.min(Math.max(0, Math.floor(daysSinceStart / 7)), 7);
+  currentWeek = weeks[weekIndex];
+
+  const weekProgress = Math.min(100, ((weekIndex + 1) / 8) * 100);
+  document.getElementById('weekProgressFill').style.width = weekProgress + '%';
+  document.getElementById('weekProgressLabel').textContent = `Week ${weekIndex + 1} of 8 in progress`;
+
+  document.getElementById('weekLabel').textContent = `Week ${currentWeek.num}`;
+  document.getElementById('weekTitle').textContent = currentWeek.title;
+  document.getElementById('weekGoal').textContent = currentWeek.goal;
+  document.getElementById('weekNum').textContent = currentWeek.num;
+  document.getElementById('phrasesCount').textContent = currentWeek.phrases.length;
+
+  const phraseList = document.getElementById('phraseList');
+  phraseList.innerHTML = currentWeek.phrases.map(p =>
+    `<li><span class="phrase-es">${p.es}</span><span class="phrase-en">${p.en}</span></li>`
+  ).join('');
+
+  const routineList = document.getElementById('routineList');
+  routineList.innerHTML = currentWeek.routine.map(r =>
+    `<li><span class="routine-time">${r.time}</span><span>${r.task}</span></li>`
+  ).join('');
+
+  // Init flashcards
+  buildDeck('week');
+  renderCard();
+
+  // Restore API key
+  const savedKey = localStorage.getItem('anthropic_api_key');
+  if (savedKey) document.getElementById('apiKeyInput').value = savedKey;
+  document.getElementById('apiKeyInput').addEventListener('change', () => {
+    localStorage.setItem('anthropic_api_key', document.getElementById('apiKeyInput').value.trim());
+  });
+}
+
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+function switchTab(tab, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ============================================================
+// FLASHCARDS
+// ============================================================
+function getAllPhrases() {
+  return weeks.flatMap(w => w.phrases.map(p => ({ ...p, week: w.num, title: w.title })));
+}
+
+function buildDeck(mode) {
+  deckMode = mode;
+  let phrases;
+  if (mode === 'week') {
+    phrases = currentWeek.phrases.map(p => ({ ...p, week: currentWeek.num, title: currentWeek.title }));
+  } else {
+    phrases = getAllPhrases();
+  }
+  // Shuffle
+  flashDeck = phrases.sort(() => Math.random() - 0.5);
+  flashIndex = 0;
+  flashCorrect = 0;
+  flashTotal = 0;
+  flashResults = [];
+  updateScoreDisplay();
+}
+
+function renderCard() {
+  if (flashIndex >= flashDeck.length) {
+    showSummary();
+    return;
+  }
+  const card = flashDeck[flashIndex];
+  document.getElementById('cardSpanish').textContent = card.es;
+  document.getElementById('cardEnglish').textContent = card.en;
+  document.getElementById('cardWeek').textContent = `Week ${card.week}: ${card.title}`;
+  isFlipped = false;
+  document.getElementById('flashcardInner').classList.remove('flipped');
+  document.getElementById('btnWrong').disabled = true;
+  document.getElementById('btnRight').disabled = true;
+  updateProgressTrack();
+}
+
+function flipCard() {
+  if (flashIndex >= flashDeck.length) return;
+  isFlipped = !isFlipped;
+  document.getElementById('flashcardInner').classList.toggle('flipped', isFlipped);
+  if (isFlipped) {
+    document.getElementById('btnWrong').disabled = false;
+    document.getElementById('btnRight').disabled = false;
+  }
+}
+
+function markAnswer(correct) {
+  flashTotal++;
+  if (correct) flashCorrect++;
+  flashResults.push(correct);
+  flashIndex++;
+  updateScoreDisplay();
+  renderCard();
+}
+
+function updateScoreDisplay() {
+  document.getElementById('correctCount').textContent = flashCorrect;
+  document.getElementById('totalCount').textContent = flashTotal;
+  const pct = flashTotal > 0 ? Math.round((flashCorrect / flashTotal) * 100) + '%' : '—';
+  document.getElementById('sessionPct').textContent = pct;
+}
+
+function updateProgressTrack() {
+  const track = document.getElementById('progressTrack');
+  track.innerHTML = flashDeck.map((_, i) => {
+    if (i < flashResults.length) {
+      return `<div class="dot ${flashResults[i] ? 'correct' : 'wrong'}"></div>`;
+    }
+    return `<div class="dot${i === flashIndex ? ' current' : ''}"></div>`;
+  }).join('');
+}
+
+function showSummary() {
+  const pct = flashTotal > 0 ? Math.round((flashCorrect / flashTotal) * 100) : 0;
+  const grade = pct >= 80 ? '🎉 ¡Excelente!' : pct >= 60 ? '💪 ¡Bien hecho!' : '📚 Sigue practicando';
+  document.getElementById('flashcardContainer').innerHTML = `
+    <div class="session-summary">
+      <div class="big">${pct}%</div>
+      <div class="sub">${flashCorrect} of ${flashTotal} correct</div>
+      <div style="margin-top:12px;font-size:18px">${grade}</div>
+    </div>`;
+}
+
+function changeDeck(mode) {
+  buildDeck(mode);
+  document.getElementById('flashcardContainer').innerHTML = `
+    <div class="flashcard-container" id="flashcardContainer" onclick="flipCard()">
+      <div class="flashcard-inner" id="flashcardInner">
+        <div class="flashcard-face flashcard-front">
+          <div class="label">Spanish</div>
+          <div class="spanish" id="cardSpanish"></div>
+          <div class="tap-hint">Tap to reveal</div>
+        </div>
+        <div class="flashcard-face flashcard-back">
+          <div class="label">English</div>
+          <div class="english" id="cardEnglish"></div>
+          <div class="week-tag" id="cardWeek"></div>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('flashcardContainer').onclick = flipCard;
+  renderCard();
+}
+
+function restartDrill() {
+  buildDeck(deckMode);
+  // Rebuild flashcard HTML in case it was replaced by summary
+  const container = document.getElementById('flashcardContainer');
+  container.innerHTML = `
+      <div class="flashcard-inner" id="flashcardInner">
+        <div class="flashcard-face flashcard-front">
+          <div class="label">Spanish</div>
+          <div class="spanish" id="cardSpanish"></div>
+          <div class="tap-hint">Tap to reveal</div>
+        </div>
+        <div class="flashcard-face flashcard-back">
+          <div class="label">English</div>
+          <div class="english" id="cardEnglish"></div>
+          <div class="week-tag" id="cardWeek"></div>
+        </div>
+      </div>`;
+  renderCard();
+}
+
+// ============================================================
+// CONVERSATION SIMULATOR
+// ============================================================
+function startSimulation() {
+  const scenarioKey = document.getElementById('scenarioSelect').value;
+  activeScenario = scenarios[scenarioKey];
+  chatHistory = [];
+
+  const badge = document.getElementById('activeBadge');
+  badge.style.display = 'inline-flex';
+  document.getElementById('badgeIcon').textContent = activeScenario.icon;
+  document.getElementById('badgeText').textContent = activeScenario.label;
+
+  const chatWindow = document.getElementById('chatWindow');
+  chatWindow.innerHTML = '';
+
+  document.getElementById('chatInput').disabled = false;
+  document.getElementById('sendBtn').disabled = false;
+  document.getElementById('chatInput').focus();
+
+  // Send a "start" message to get the AI to open the conversation
+  callClaude('[[START_SCENARIO]]', true);
+}
+
+function clearChat() {
+  chatHistory = [];
+  activeScenario = null;
+  document.getElementById('chatWindow').innerHTML = `
+    <div class="chat-empty">
+      <div class="icon">💬</div>
+      <div>Choose a scenario and tap Start to begin practicing your Spanish conversation.</div>
+    </div>`;
+  document.getElementById('chatInput').disabled = true;
+  document.getElementById('sendBtn').disabled = true;
+  document.getElementById('activeBadge').style.display = 'none';
+}
+
+function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text || isTyping || !activeScenario) return;
+
+  addMessage(text, 'user');
+  input.value = '';
+  callClaude(text, false);
+}
+
+function addMessage(text, type) {
+  const chatWindow = document.getElementById('chatWindow');
+
+  // If correction marker found, split and render separately
+  if (type === 'ai' && text.includes('[CORRECTION:')) {
+    const parts = text.split(/\[CORRECTION:/);
+    const mainText = parts[0].trim();
+    if (mainText) {
+      const div = document.createElement('div');
+      div.className = 'msg msg-ai';
+      div.textContent = mainText;
+      chatWindow.appendChild(div);
+    }
+    if (parts[1]) {
+      const correctionText = parts[1].replace(']', '').trim();
+      const div = document.createElement('div');
+      div.className = 'msg-correction';
+      div.innerHTML = `<strong>✏️ Corrección:</strong> ${correctionText}`;
+      chatWindow.appendChild(div);
+    }
+  } else {
+    const div = document.createElement('div');
+    div.className = `msg msg-${type}`;
+    div.textContent = text;
+    chatWindow.appendChild(div);
+  }
+
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+function showTyping() {
+  const chatWindow = document.getElementById('chatWindow');
+  const div = document.createElement('div');
+  div.className = 'msg-typing';
+  div.id = 'typingIndicator';
+  div.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+  chatWindow.appendChild(div);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+function hideTyping() {
+  const el = document.getElementById('typingIndicator');
+  if (el) el.remove();
+}
+
+async function callClaude(userMessage, isStart) {
+  const apiKey = document.getElementById('apiKeyInput').value.trim();
+  if (!apiKey) {
+    addMessage('⚠️ Please enter your Anthropic API key above to use the simulator.', 'ai');
+    return;
+  }
+
+  isTyping = true;
+  document.getElementById('sendBtn').disabled = true;
+  showTyping();
+
+  if (!isStart) {
+    chatHistory.push({ role: 'user', content: userMessage });
+  }
+
+  const messages = isStart
+    ? [{ role: 'user', content: 'Por favor, comienza el escenario. Preséntate y empieza la conversación.' }]
+    : [...chatHistory];
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 300,
+        system: activeScenario.system,
+        messages: messages,
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error?.message || `API error ${response.status}`);
+    }
+
+    const data = await response.json();
+    const reply = data.content[0].text;
+
+    hideTyping();
+    addMessage(reply, 'ai');
+    chatHistory.push({ role: 'assistant', content: reply });
+
+  } catch (err) {
+    hideTyping();
+    addMessage(`⚠️ Error: ${err.message}`, 'ai');
+  } finally {
+    isTyping = false;
+    document.getElementById('sendBtn').disabled = false;
+  }
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+init();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/eddienicolau/**)",
+      "Bash(mkdir -p \"Desktop/AI projects/Language learning\")",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)"
+    ]
+  }
+}
