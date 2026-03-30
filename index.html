@@ -883,11 +883,6 @@
       <ul class="custom-phrase-list" id="customPhraseList"></ul>
     </div>
 
-    <div id="migrateCard" class="card" style="margin-top:16px;border-color:rgba(232,100,58,0.3)">
-      <h3 style="margin-bottom:8px">Migrate from this browser</h3>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Found old phrases saved locally in this browser. Click to move them to Supabase.</p>
-      <button class="btn-primary" onclick="migrateLocalPhrases()">Migrate my old phrases</button>
-    </div>
   </section>
 
 </main>
@@ -1687,23 +1682,6 @@ function updateCustomBadge(count) {
   if (savedCount) savedCount.textContent = count > 0 ? `(${count})` : '';
 }
 
-async function migrateLocalPhrases() {
-  let local = [];
-  try { local = JSON.parse(localStorage.getItem('custom_phrases') || '[]'); } catch {}
-  if (local.length === 0) {
-    document.getElementById('migrateCard').style.display = 'none';
-    return;
-  }
-  const btn = document.querySelector('#migrateCard .btn-primary');
-  btn.disabled = true;
-  btn.textContent = 'Migrating...';
-  for (const p of local) {
-    await sb.from('custom_phrases').insert({ spanish: p.es, english: p.en });
-  }
-  localStorage.removeItem('custom_phrases');
-  document.getElementById('migrateCard').style.display = 'none';
-  await syncCustomPhrases();
-}
 
 async function syncCustomPhrases() {
   const { data, error } = await sb
