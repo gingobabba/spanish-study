@@ -496,6 +496,22 @@
     }
     .msg-correction strong { color: var(--red); }
 
+    .msg-lookup {
+      align-self: flex-start;
+      background: rgba(80,140,232,0.08);
+      border: 1px solid rgba(80,140,232,0.25);
+      color: #aac8ff;
+      font-size: 12px;
+      border-radius: 8px;
+      padding: 7px 11px;
+      max-width: 92%;
+    }
+    .msg-lookup strong { color: #6aaeff; }
+    .msg-lookup .lookup-row { margin-top: 3px; }
+    .msg-lookup .lookup-es { color: #e0f0ff; font-weight: 600; }
+    .msg-lookup .lookup-note { color: #7899bb; font-style: italic; }
+    .slash-word { text-decoration: underline; text-decoration-style: dotted; opacity: 0.85; }
+
     .msg-typing {
       align-self: flex-start;
       background: var(--card);
@@ -1386,12 +1402,76 @@ function clearChat() {
 
 function sendMessage() {
   const input = document.getElementById('chatInput');
-  const text = input.value.trim();
-  if (!text || isTyping || !activeScenario) return;
+  const rawText = input.value.trim();
+  if (!rawText || isTyping || !activeScenario) return;
 
-  addMessage(text, 'user');
+  // Extract /word lookups — e.g. "/beautiful" or "/train station"
+  const lookupMatches = [...rawText.matchAll(/\/([a-zA-ZÀ-ÿ][a-zA-ZÀ-ÿ\s]*?)(?=\s*[\/,\.!?]|\s*$)/g)];
+  const lookupWords = [...new Set(lookupMatches.map(m => m[1].trim().toLowerCase()))];
+
+  // Strip slashes for what gets sent to Claude so the conversation reads naturally
+  const cleanText = rawText.replace(/\/([a-zA-ZÀ-ÿ][a-zA-ZÀ-ÿ\s]*?)(?=\s*[\/,\.!?]|\s*$)/g, '$1');
+
+  // Show user bubble — highlight the looked-up words with a dotted underline
+  addMessageWithHighlights(rawText, lookupWords);
   input.value = '';
-  callClaude(text, false);
+
+  // Fire conversation + optional lookup in parallel
+  callClaude(cleanText, false);
+  if (lookupWords.length > 0) callClaudeLookup(lookupWords);
+}
+
+function addMessageWithHighlights(text, lookupWords) {
+  const chatWindow = document.getElementById('chatWindow');
+  const div = document.createElement('div');
+  div.className = 'msg msg-user';
+
+  if (lookupWords.length === 0) {
+    div.textContent = text;
+  } else {
+    // Wrap /word spans so they show with dotted underline
+    const escaped = text.replace(/</g, '&lt;');
+    const highlighted = escaped.replace(/\/([a-zA-ZÀ-ÿ][a-zA-ZÀ-ÿ\s]*?)(?=\s*[\/,\.!?]|\s*$)/g,
+      (_, w) => `<span class="slash-word">${w}</span>`);
+    div.innerHTML = highlighted;
+  }
+
+  chatWindow.appendChild(div);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+async function callClaudeLookup(words) {
+  const apiKey = document.getElementById('apiKeyInput').value.trim();
+  if (!apiKey) return;
+
+  const wordList = words.join(', ');
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 150,
+        system: `You are a Spanish translator. For each English word or phrase given, reply with exactly one line per word in this format:
+word → traducción (brief note only if there are multiple meanings or important context)
+Keep notes very short — 4 words max. No extra text, no numbering, no blank lines.`,
+        messages: [{ role: 'user', content: wordList }],
+      })
+    });
+
+    if (!response.ok) return;
+    const data = await response.json();
+    const raw = data.content[0].text.trim();
+    addLookupBubble(raw);
+  } catch {
+    // Lookup failures are silent — don't disrupt the conversation
+  }
 }
 
 function addMessage(text, type) {
@@ -1421,6 +1501,37 @@ function addMessage(text, type) {
     chatWindow.appendChild(div);
   }
 
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+function addLookupBubble(raw) {
+  const chatWindow = document.getElementById('chatWindow');
+  const div = document.createElement('div');
+  div.className = 'msg-lookup';
+
+  const lines = raw.split('\n').filter(l => l.includes('→'));
+  if (lines.length === 0) return;
+
+  const header = document.createElement('strong');
+  header.textContent = '🔍 Lookup';
+  div.appendChild(header);
+
+  lines.forEach(line => {
+    const [enPart, rest] = line.split('→').map(s => s.trim());
+    if (!rest) return;
+    // rest may be "traducción (note)" or just "traducción"
+    const noteMatch = rest.match(/^(.+?)\s*\((.+)\)$/);
+    const row = document.createElement('div');
+    row.className = 'lookup-row';
+    if (noteMatch) {
+      row.innerHTML = `${enPart} → <span class="lookup-es">${noteMatch[1].trim()}</span> <span class="lookup-note">(${noteMatch[2].trim()})</span>`;
+    } else {
+      row.innerHTML = `${enPart} → <span class="lookup-es">${rest}</span>`;
+    }
+    div.appendChild(row);
+  });
+
+  chatWindow.appendChild(div);
   chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
