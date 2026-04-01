@@ -71,17 +71,20 @@
     }
     nav button {
       flex: 1;
-      padding: 12px 2px;
+      padding: 10px 1px;
       background: none;
       border: none;
       border-bottom: 2px solid transparent;
       color: var(--muted);
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.15s;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.2px;
       text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     nav button.active {
       color: var(--accent);
@@ -727,6 +730,7 @@
   <button onclick="switchTab('flashcard', this)">Flashcards</button>
   <button onclick="switchTab('simulator', this)">Simulator</button>
   <button onclick="switchTab('mywords', this)">My Words <span class="custom-count-badge" id="customCountBadge" style="display:none"></span></button>
+  <button onclick="switchTab('listening', this)">Listen</button>
 </nav>
 
 <main>
@@ -883,6 +887,36 @@
       <ul class="custom-phrase-list" id="customPhraseList"></ul>
     </div>
 
+  </section>
+
+  <!-- LISTENING -->
+  <section id="listening" class="section">
+    <div class="card" style="margin-bottom:16px">
+      <h3>Language Transfer — Complete Spanish</h3>
+      <p style="font-size:13px; color:var(--muted); margin-top:4px; line-height:1.5;">
+        40 lessons building Spanish from the ground up. No memorization — just patterns.
+        Great to listen while commuting or before bed.
+      </p>
+    </div>
+    <div style="border-radius:12px; overflow:hidden; margin-bottom:14px;">
+      <iframe
+        width="100%"
+        height="450"
+        scrolling="no"
+        frameborder="no"
+        allow="autoplay"
+        src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/languagetransfer/sets/complete-spanish&color=%23e8643a&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
+      </iframe>
+    </div>
+    <div class="card">
+      <h3>Tips</h3>
+      <ul style="list-style:none; font-size:13px; color:var(--muted); line-height:2;">
+        <li>▸ Pause and repeat out loud — don't just listen passively</li>
+        <li>▸ Each lesson is ~10 min — perfect for a commute</li>
+        <li>▸ Start from lesson 1 even if you know some Spanish</li>
+        <li>▸ Pair with this week's flashcards for best results</li>
+      </ul>
+    </div>
   </section>
 
 </main>
