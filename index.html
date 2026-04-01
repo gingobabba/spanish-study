@@ -722,7 +722,7 @@
 
 <header>
   <h1>🇲🇽 Español</h1>
-  <div class="trip-badge">✈️ Guadalajara • May 22</div>
+  <div class="trip-badge">✈️ Guadalajara • May 22 • <span id="headerDaysLeft">—</span>d</div>
 </header>
 
 <nav>
@@ -1243,6 +1243,7 @@ function init() {
   tripDate.setHours(0,0,0,0);
   const daysLeft = Math.max(0, Math.ceil((tripDate - today) / 86400000));
   document.getElementById('daysLeft').textContent = daysLeft;
+  document.getElementById('headerDaysLeft').textContent = daysLeft;
 
   // Figure out current week
   const startDate = new Date(STUDY_START);
