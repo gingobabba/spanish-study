@@ -235,6 +235,8 @@ function buildMorningMessage(week) {
   week.routine.forEach(r => lines.push(`• ${r}`));
 
   lines.push('');
+  lines.push(`🎧 *Listen:* Language Transfer Complete Spanish — 10 min/lesson, great for commuting.`);
+  lines.push('');
   lines.push(`¡Buena suerte hoy! 💪`);
 
   return lines.join('\n');
@@ -262,6 +264,8 @@ function buildEveningMessage(week) {
   lines.push('');
   lines.push(`Open the app to practice with the Conversation Simulator! 📱`);
   lines.push(`_Tap the spoilers above to check your answers._`);
+  lines.push('');
+  lines.push(`🎧 *Listen:* Squeeze in a Language Transfer lesson before bed — 10 min is all it takes.`);
 
   return lines.join('\n');
 }
